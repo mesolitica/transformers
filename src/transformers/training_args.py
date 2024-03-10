@@ -2157,6 +2157,10 @@ class TrainingArguments:
                 self._n_gpu = torch.cuda.device_count()
                 if device.type == "cuda":
                     torch.cuda.set_device(device)
+        
+        print('LOCAL_RANK', os.environ.get('LOCAL_RANK'))
+        device = torch.device("cuda", int(os.environ.get('LOCAL_RANK')))
+        torch.cuda.set_device(device)
         return device
 
     @property

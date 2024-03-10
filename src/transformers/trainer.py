@@ -2072,9 +2072,8 @@ class Trainer:
                 model, self.optimizer, self.lr_scheduler = self.accelerator.prepare(
                     self.model, self.optimizer, self.lr_scheduler
                 )
-        elif self.args.optim in [OptimizerNames.LOMO, OptimizerNames.ADALOMO]:
-            # In this case we are in DDP + LOMO, which should be supported
-            self.optimizer = self.accelerator.prepare(self.optimizer)
+            for i in model.named_parameters():
+                print(f"after {i[0]} -> {i[1].device}, {self.args.device}")
 
         if self.is_fsdp_enabled:
             self.model = self.model_wrapped = model
@@ -2167,6 +2166,8 @@ class Trainer:
         self.state.is_world_process_zero = self.is_world_process_zero()
 
         # tr_loss is a tensor to avoid synchronization of TPUs through .item()
+        local_rank = os.environ.get('LOCAL_RANK')
+        print('local_rank', local_rank, args.device, next(model.parameters()).device)
         tr_loss = torch.tensor(0.0).to(args.device)
         # _total_loss_scalar is updated everytime .item() has to be called on tr_loss and stores the sum of all losses
         self._total_loss_scalar = 0.0
